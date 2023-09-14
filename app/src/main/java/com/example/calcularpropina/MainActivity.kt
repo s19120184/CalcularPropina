@@ -4,6 +4,8 @@ import android.icu.text.NumberFormat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,10 +53,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipTimeLayout() {
+
+    var entradaPropina by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf(" ")}
-    //creamos una varible que recibe el valor de amountInput transdormado a double
-    var amount=amountInput.toDoubleOrNull() ?: 0.0
-    val propina= calculateTip(amount)//calcula la propina
+
+    // trasformamos lo que recibiomos en los textField a doble y lo pasamos a calcular propina
+    val porcentajePropina=entradaPropina.toDoubleOrNull() ?:0.0
+    val amount=amountInput.toDoubleOrNull() ?: 0.0
+    val propina= calculateTip(amount ,porcentajePropina)//calcula la propina
 
     Column(
         modifier = Modifier.padding(40.dp),
@@ -67,8 +74,22 @@ fun TipTimeLayout() {
                 .align(alignment = Alignment.Start)
         )
         EditarCampoNumero(
+            label=R.string.bill_amount,
+            opcionesTeclado = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next),//cambia la imagen de accion de teclado
             value = amountInput,
             valorCambia = { amountInput = it },
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth())
+        EditarCampoNumero(//esto agrega otro cuadro de texto
+            label=R.string.how_was_the_service,
+            opcionesTeclado = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done),//cambia la imagen de accion de teclado
+            value = entradaPropina,
+            valorCambia = { entradaPropina=it },
             modifier = Modifier
                 .padding(bottom = 32.dp)
                 .fillMaxWidth())
@@ -90,20 +111,26 @@ fun TipTimeLayoutPreview() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable  //editNumberField recibe tres parametros una cadena ,una funcion y modificador
-fun EditarCampoNumero( value: String,
-                      valorCambia: (String)-> Unit,
-                      modifier: Modifier = Modifier){
+@Composable  //editNumberField
+fun EditarCampoNumero(
+    @StringRes label:Int, //id del recurso
+    opcionesTeclado: KeyboardOptions,//para modificar opciones de teclado
+    value: String,//valor que se Muestra
+    valorCambia: (String)-> Unit, //un funcion tipo string
+    modifier: Modifier = Modifier) //modificadores
+
+
+{
 
     //value es un cuadro de texto que muestra el valor de cadena que pasas aquí.
     // El parámetro onValueChange es la devolución de llamada lambda que se activa cuando el usuario ingresa texto en el cuadro.
     TextField(
         value=value,
         onValueChange = valorCambia ,
-        label = { Text(stringResource(R.string.bill_amount) ) },
+        label = { Text(stringResource(label) ) },
         singleLine = true,//condensa el cuadro de texto en una sola linea
         //fija el tipo de teclado en numeros a din de ingresar numeros
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        keyboardOptions = opcionesTeclado,//pasamo la opciones de teclado segun los parametros que entren
         modifier= modifier
     )
 }
