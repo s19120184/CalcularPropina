@@ -8,15 +8,20 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -53,14 +58,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipTimeLayout() {
-
+    //variables de estado
+    var roundUp by remember { mutableStateOf(false) }
     var entradaPropina by remember { mutableStateOf("") }
     var amountInput by remember { mutableStateOf(" ")}
 
     // trasformamos lo que recibiomos en los textField a doble y lo pasamos a calcular propina
     val porcentajePropina=entradaPropina.toDoubleOrNull() ?:0.0
     val amount=amountInput.toDoubleOrNull() ?: 0.0
-    val propina= calculateTip(amount ,porcentajePropina)//calcula la propina
+    val propina= calculateTip(amount ,porcentajePropina,roundUp)//calcula la propina y redondea segun el estado de rounduup
 
     Column(
         modifier = Modifier.padding(40.dp),
@@ -93,6 +99,10 @@ fun TipTimeLayout() {
             modifier = Modifier
                 .padding(bottom = 32.dp)
                 .fillMaxWidth())
+        RedondearPropina(
+            roundUp = roundUp,
+            onRoundUpChanged = {roundUp = it} ,
+            modificador = Modifier.padding(bottom = 32.dp))
         Text(
             text = stringResource(R.string.tip_amount, propina),
             style = MaterialTheme.typography.displaySmall
@@ -135,9 +145,40 @@ fun EditarCampoNumero(
     )
 }
 
+@Composable//roundTheTipRow
+fun RedondearPropina(
+    roundUp: Boolean,
+    onRoundUpChanged: (Boolean)-> Unit ,
+    modificador: Modifier= Modifier){
 
-private fun calculateTip(amount: Double, tipPercent: Double = 15.0): String {
-    val tip = tipPercent / 100 * amount
+    //una fila
+    Row(
+        modifier= modificador
+            .fillMaxWidth()//ancho al maximo de la pantalla
+            .size(48.dp), //tamanio
+        verticalAlignment=Alignment.CenterVertically //centra la alineacion
+    ){
+        Text(text = stringResource(R.string.round_up_tip))//muestra el texto de la fila
+        Switch(
+            modifier= modificador
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.End),//alinea el elemento al final de la pantalla
+            checked = roundUp, //indica si el interruptor esta  marcado
+            onCheckedChange = onRoundUpChanged )//devolucion de la llamado cuado se haga click
+    }
+
+}
+
+
+private fun calculateTip(amount: Double, tipPercent: Double = 15.0, roundUp: Boolean): String {
+
+    var tip = tipPercent / 100 * amount
+
+    //verificamos si es true se redondea la propina
+    if(roundUp){
+        tip=kotlin.math.ceil(tip)
+    }
+
     return NumberFormat.getCurrencyInstance().format(tip)
 }
 
