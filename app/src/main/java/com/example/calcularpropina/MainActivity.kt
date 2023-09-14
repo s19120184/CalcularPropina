@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.calcularpropina.ui.theme.CalcularPropinaTheme
@@ -59,7 +61,9 @@ fun TipTimeLayout() {
                 .padding(bottom = 16.dp)
                 .align(alignment = Alignment.Start)
         )
-        EditarCampoNumero(modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth())
+        EditarCampoNumero(modifier = Modifier
+            .padding(bottom = 32.dp)
+            .fillMaxWidth())
         Text(
             text = stringResource(R.string.tip_amount, "$0.00"),
             style = MaterialTheme.typography.displaySmall
@@ -80,14 +84,24 @@ fun TipTimeLayoutPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable  //editNumberField
 fun EditarCampoNumero(modifier: Modifier =Modifier){
+
     var amountInput by remember { mutableStateOf("")}
+
+    //creamos una varible que recibe el valor de amountInput transdormado a double
+    var amount=amountInput.toDoubleOrNull() ?: 0.0
+    val propina= calculateTip(amount)//calcula la propina
 
     //value es un cuadro de texto que muestra el valor de cadena que pasas aquí.
     // El parámetro onValueChange es la devolución de llamada lambda que se activa cuando el usuario ingresa texto en el cuadro.
     TextField(
         value=amountInput,
         onValueChange = { amountInput =it } ,
-        modifier= modifier
+        label = { //agregamos un label al textField
+            Text(stringResource(R.string.bill_amount) ) },
+        singleLine = true,//condensa el cuadro de texto en una sola linea
+        //fija el tipo de teclado en numeros a din de ingresar numeros
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier= Modifier.fillMaxWidth()
     )
 }
 
