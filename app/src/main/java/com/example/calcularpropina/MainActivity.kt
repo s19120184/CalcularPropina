@@ -50,6 +50,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipTimeLayout() {
+    var amountInput by remember { mutableStateOf(" ")}
+    //creamos una varible que recibe el valor de amountInput transdormado a double
+    var amount=amountInput.toDoubleOrNull() ?: 0.0
+    val propina= calculateTip(amount)//calcula la propina
+
     Column(
         modifier = Modifier.padding(40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -61,11 +66,14 @@ fun TipTimeLayout() {
                 .padding(bottom = 16.dp)
                 .align(alignment = Alignment.Start)
         )
-        EditarCampoNumero(modifier = Modifier
-            .padding(bottom = 32.dp)
-            .fillMaxWidth())
+        EditarCampoNumero(
+            value = amountInput,
+            valorCambia = { amountInput = it },
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth())
         Text(
-            text = stringResource(R.string.tip_amount, "$0.00"),
+            text = stringResource(R.string.tip_amount, propina),
             style = MaterialTheme.typography.displaySmall
         )
 
@@ -82,26 +90,21 @@ fun TipTimeLayoutPreview() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable  //editNumberField
-fun EditarCampoNumero(modifier: Modifier =Modifier){
-
-    var amountInput by remember { mutableStateOf("")}
-
-    //creamos una varible que recibe el valor de amountInput transdormado a double
-    var amount=amountInput.toDoubleOrNull() ?: 0.0
-    val propina= calculateTip(amount)//calcula la propina
+@Composable  //editNumberField recibe tres parametros una cadena ,una funcion y modificador
+fun EditarCampoNumero( value: String,
+                      valorCambia: (String)-> Unit,
+                      modifier: Modifier = Modifier){
 
     //value es un cuadro de texto que muestra el valor de cadena que pasas aquí.
     // El parámetro onValueChange es la devolución de llamada lambda que se activa cuando el usuario ingresa texto en el cuadro.
     TextField(
-        value=amountInput,
-        onValueChange = { amountInput =it } ,
-        label = { //agregamos un label al textField
-            Text(stringResource(R.string.bill_amount) ) },
+        value=value,
+        onValueChange = valorCambia ,
+        label = { Text(stringResource(R.string.bill_amount) ) },
         singleLine = true,//condensa el cuadro de texto en una sola linea
         //fija el tipo de teclado en numeros a din de ingresar numeros
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier= Modifier.fillMaxWidth()
+        modifier= modifier
     )
 }
 
