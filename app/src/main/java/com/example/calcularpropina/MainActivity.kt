@@ -1,9 +1,11 @@
 package com.example.calcularpropina
 
+import android.graphics.drawable.Icon
 import android.icu.text.NumberFormat
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +19,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -32,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -69,7 +75,9 @@ fun TipTimeLayout() {
     val propina= calculateTip(amount ,porcentajePropina,roundUp)//calcula la propina y redondea segun el estado de rounduup
 
     Column(
-        modifier = Modifier.padding(40.dp),
+        modifier = Modifier
+            .padding(40.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -81,6 +89,7 @@ fun TipTimeLayout() {
         )
         EditarCampoNumero(
             label=R.string.bill_amount,
+            icono=R.drawable.money,
             opcionesTeclado = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next),//cambia la imagen de accion de teclado
@@ -91,6 +100,7 @@ fun TipTimeLayout() {
                 .fillMaxWidth())
         EditarCampoNumero(//esto agrega otro cuadro de texto
             label=R.string.how_was_the_service,
+            icono = R.drawable.percent,
             opcionesTeclado = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done),//cambia la imagen de accion de teclado
@@ -124,6 +134,7 @@ fun TipTimeLayoutPreview() {
 @Composable  //editNumberField
 fun EditarCampoNumero(
     @StringRes label:Int, //id del recurso
+    @DrawableRes icono: Int,//parametro para agregar un icono
     opcionesTeclado: KeyboardOptions,//para modificar opciones de teclado
     value: String,//valor que se Muestra
     valorCambia: (String)-> Unit, //un funcion tipo string
@@ -136,6 +147,7 @@ fun EditarCampoNumero(
     // El parámetro onValueChange es la devolución de llamada lambda que se activa cuando el usuario ingresa texto en el cuadro.
     TextField(
         value=value,
+        leadingIcon ={ Icon(painter= painterResource(id = icono),null) },
         onValueChange = valorCambia ,
         label = { Text(stringResource(label) ) },
         singleLine = true,//condensa el cuadro de texto en una sola linea
